@@ -1,0 +1,9 @@
+vaadin:
+  launch-browser: true
+spring:
+  application:
+    name: demo
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
