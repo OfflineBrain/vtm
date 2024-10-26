@@ -15,7 +15,7 @@ import com.vaadin.flow.i18n.LocaleChangeObserver
 import com.vaadin.flow.router.HasDynamicTitle
 import com.vaadin.flow.router.PageTitle
 import com.vaadin.flow.server.VaadinSession
-import com.vaadin.flow.theme.lumo.LumoUtility
+import com.vaadin.flow.theme.lumo.LumoUtility.*
 import kotlin.reflect.full.findAnnotations
 
 
@@ -47,42 +47,43 @@ class VTMLayout : AppLayout(), LocaleChangeObserver {
 
         toggle = DrawerToggle()
         viewTitle = H2(getTranslation("interface.label.title")).apply {
-            addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE, LumoUtility.Flex.GROW)
+            addClassNames(FontSize.LARGE, Margin.NONE, Flex.GROW)
         }
 
         val header = Header(toggle, viewTitle, localeSelector).apply {
             addClassNames(
-                LumoUtility.AlignItems.CENTER,
-                LumoUtility.Display.FLEX,
-                LumoUtility.Padding.End.MEDIUM,
-                LumoUtility.Width.FULL
+                AlignItems.CENTER,
+                Display.FLEX,
+                Padding.End.MEDIUM,
+                Width.FULL
             )
         }
+
         addToNavbar(false, header)
 
         menuSpan = Span(getTranslation("interface.label.menu"))
         menuSpan.addClassNames(
-            LumoUtility.AlignItems.CENTER,
-            LumoUtility.Display.FLEX,
-            LumoUtility.FontSize.LARGE,
-            LumoUtility.FontWeight.SEMIBOLD,
-            LumoUtility.Height.XLARGE,
-            LumoUtility.Padding.Horizontal.MEDIUM
+            AlignItems.CENTER,
+            Display.FLEX,
+            FontSize.LARGE,
+            FontWeight.SEMIBOLD,
+            Height.XLARGE,
+            Padding.Horizontal.MEDIUM
         );
 
-        addToDrawer(menuSpan, Scroller(createSideNav()));
+        addToDrawer(menuSpan, Scroller(createSideNav()))
     }
 
     private fun createSideNav(): SideNav {
         val nav = SideNav()
 
         val mainViewNav = object : SideNavItem(
-            getTranslation("interface.label.view.main"),
+            getTranslation("interface.label.view.character.creation"),
             MainView::class.java,
-            VaadinIcon.BUILDING.create()
+            VaadinIcon.CHAT.create()
         ), LocaleChangeObserver {
             override fun localeChange(event: LocaleChangeEvent) {
-                label = getTranslation("interface.label.view.main")
+                label = getTranslation("interface.label.view.character.creation")
             }
         }
 
@@ -103,19 +104,23 @@ class VTMLayout : AppLayout(), LocaleChangeObserver {
             }
 
             is HasDynamicTitle -> {
-                return (content as HasDynamicTitle).pageTitle.also { getTranslation(it) }
+                return (content as HasDynamicTitle).pageTitle
             }
 
             else -> {
                 val title = content::class.findAnnotations(PageTitle::class).firstOrNull()
-                return title?.value?.also { getTranslation(it) } ?: getTranslation("interface.label.title")
+                return title?.value?.let { getTranslation(it) } ?: getTranslation("interface.label.title")
             }
         }
     }
 
     override fun localeChange(event: LocaleChangeEvent) {
         localeSelector.setItemLabelGenerator { getTranslation(it.key) }
-        viewTitle.text = getCurrentPageTitle()
+        val currentPageTitle = getCurrentPageTitle()
+        viewTitle.text = currentPageTitle
         menuSpan.text = getTranslation("interface.label.menu")
+        ui.get().page.executeJs("""
+            document.title = '${currentPageTitle}';
+        """.trimIndent())
     }
 }
