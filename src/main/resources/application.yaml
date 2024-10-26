@@ -7,3 +7,6 @@ spring:
     basename: messages
     encoding: UTF-8
     fallback-to-system-locale: false
+  threads:
+    virtual:
+      enabled: true
